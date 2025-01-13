@@ -1,6 +1,6 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
-import 'home_screen.dart';
+import 'menu_screen.dart';
 
 void main() {
   runApp(MyApp());
@@ -12,9 +12,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Chess Trainer',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: HomeScreen(),
+      title: 'Multi-Trainer App',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: MenuScreen(), // Главный экран — выбор тренажёра
     );
   }
 }

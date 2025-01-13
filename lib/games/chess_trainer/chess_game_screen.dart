@@ -1,18 +1,18 @@
-// lib/home_screen.dart
+// lib/games/chess_trainer/chess_game_screen.dart
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'models/result.dart';
-import 'games/chess_trainer/top_results_screen.dart';
+import '../../../models/result.dart';    // Обратите внимание на путь
+import 'top_results_screen.dart';      // Экран списка результатов (этот же пакет)
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+class ChessGameScreen extends StatefulWidget {
+  const ChessGameScreen({Key? key}) : super(key: key);
 
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  _ChessGameScreenState createState() => _ChessGameScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _ChessGameScreenState extends State<ChessGameScreen> {
   List<String> positions = [];
   String highlightedPosition = '';
   String selectedPosition = '';
@@ -23,7 +23,6 @@ class _HomeScreenState extends State<HomeScreen> {
   Stopwatch stopwatch = Stopwatch();
   double elapsedTime = 0;
 
-  // Список результатов
   List<Result> topResults = [];
   late Timer timer;
 
@@ -56,7 +55,8 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       String previousPosition = highlightedPosition;
       do {
-        highlightedPosition = (positions..shuffle()).first;
+        positions.shuffle();
+        highlightedPosition = positions.first;
       } while (highlightedPosition == previousPosition);
     });
   }
@@ -101,7 +101,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> saveResult() async {
     final prefs = await SharedPreferences.getInstance();
     topResults.add(Result(score: score, time: elapsedTime));
-    // Сортируем: если score одинаковый, то по времени (возрастающий порядок),
+    // Сортируем: если score одинаковый, то по возрастанию time
     // иначе по убыванию score
     topResults.sort((a, b) {
       if (a.score == b.score) {
@@ -113,8 +113,10 @@ class _HomeScreenState extends State<HomeScreen> {
     if (topResults.length > 10) {
       topResults = topResults.sublist(0, 10);
     }
-    await prefs.setStringList('topResults',
-        topResults.map((e) => '${e.score},${e.time}').toList());
+    await prefs.setStringList(
+      'topResults',
+      topResults.map((e) => '${e.score},${e.time}').toList(),
+    );
   }
 
   Future<void> loadTopResults() async {
@@ -159,9 +161,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget buildBoard() {
-    // Получаем ширину экрана
     double screenWidth = MediaQuery.of(context).size.width;
-    // Рассчитываем размер одной клетки
     double cellSize = (screenWidth - 16) / 8;
 
     List<Widget> rows = [];
@@ -202,7 +202,6 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
 
-    // Оборачиваем доску в FittedBox для адаптации
     return Center(
       child: FittedBox(
         fit: BoxFit.contain,
@@ -218,7 +217,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Chess Position Trainer'),
+        title: Text('Chess Trainer'),
         actions: [
           IconButton(
             icon: Icon(Icons.list),
@@ -250,7 +249,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           TextSpan(
                             text:
-                            "Improve your memory skills by identifying squares.\n",
+                            "Improve your memory by identifying squares.\n",
                             style: TextStyle(
                               fontStyle: FontStyle.italic,
                               fontSize: 16,
@@ -277,8 +276,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     SizedBox(height: 20),
-                    Image.asset('assets/chess_icon.png',
-                        height: 100), // Замените путь на актуальный
+                    // Замените 'assets/chess_icon.png' на свой путь к иконке
+                    Image.asset('assets/chess_icon.png', height: 100),
                     SizedBox(height: 40),
                     ElevatedButton(
                       onPressed: startGame,

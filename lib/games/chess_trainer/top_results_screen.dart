@@ -1,6 +1,6 @@
-// lib/top_results_screen.dart
+// lib/games/chess_trainer/top_results_screen.dart
 import 'package:flutter/material.dart';
-import 'models/result.dart';
+import '../../../models/result.dart';
 
 class TopResultsScreen extends StatelessWidget {
   final List<Result> topResults;
@@ -9,7 +9,7 @@ class TopResultsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Сортируем полученные результаты (по убыванию score, при равном score - по возрастанию времени)
+    // Сортируем: по убыванию score, а при равном score — по возрастанию time
     List<Result> sortedResults = List.from(topResults);
     sortedResults.sort((a, b) {
       if (a.score == b.score) {
@@ -36,11 +36,13 @@ class TopResultsScreen extends StatelessWidget {
                 itemCount: sortedResults.length,
                 itemBuilder: (context, index) {
                   String position = (index + 1).toString();
-                  String time = sortedResults[index].time.toStringAsFixed(1) + ' seconds';
+                  String time = sortedResults[index].time.toStringAsFixed(1) + ' s';
                   String score = sortedResults[index].score.toString();
+
                   return ListTile(
                     leading: Text(position, style: TextStyle(fontSize: 18)),
-                    title: Text('Score: $score, Time: $time', style: TextStyle(fontSize: 18)),
+                    title: Text('Score: $score, Time: $time',
+                        style: TextStyle(fontSize: 18)),
                     trailing: index < 3
                         ? Icon(
                       Icons.emoji_events,
