@@ -64,7 +64,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void nextTarget() {
     setState(() {
-      highlightedPosition = (positions..shuffle()).first;
+      String previousPosition = highlightedPosition;
+      do {
+        highlightedPosition = (positions..shuffle()).first;
+      } while (highlightedPosition == previousPosition);
     });
   }
 
