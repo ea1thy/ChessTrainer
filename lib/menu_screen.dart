@@ -31,14 +31,14 @@ class MenuScreen extends StatelessWidget {
                 onPressed: () {
                   _navigateTo(context, ChessGameScreen());
                 },
-                child: Text('Chess Trainer'),
+                child: Text('Find cell'),
               ),
               SizedBox(height: 20), // Отступ между кнопками
               ElevatedButton(
                 onPressed: () {
                   _navigateTo(context, AnotherGameScreen());
                 },
-                child: Text('Another Trainer'),
+                child: Text('Enter cell name'),
               ),
             ],
           ),
