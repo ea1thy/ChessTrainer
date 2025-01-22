@@ -19,7 +19,7 @@ class _AnotherGameScreenState extends State<AnotherGameScreen> {
       ),
       body: Center(
         child: Text(
-          'Here is another trainer screen!\nImplement your game logic here.',
+          'Here is another trainer screen!\nImplement your game logic here.\nThere s a tiny addon.',
           style: TextStyle(fontSize: 18),
           textAlign: TextAlign.center,
         ),

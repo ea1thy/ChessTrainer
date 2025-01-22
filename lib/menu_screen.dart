@@ -18,24 +18,30 @@ class MenuScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text('Choose a Trainer'),
       ),
-      body: Padding(
-        padding: EdgeInsets.all(20),
-        child: Column(
-          children: [
-            ElevatedButton(
-              onPressed: () {
-                _navigateTo(context, ChessGameScreen());
-              },
-              child: Text('Chess Trainer'),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                _navigateTo(context, AnotherGameScreen());
-              },
-              child: Text('Another Trainer'),
-            ),
-          ],
+      body: Align(
+        alignment: Alignment.topCenter, // Располагаем весь контент сверху по центру
+        child: FractionallySizedBox(
+          widthFactor: 0.8, // Опционально: Задаём ширину относительно экрана (можно убрать)
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center, // Центрируем кнопки горизонтально
+            children: [
+              SizedBox(height: MediaQuery.of(context).size.height * 0.1), // 10% от высоты экрана
+              ElevatedButton(
+                onPressed: () {
+                  _navigateTo(context, ChessGameScreen());
+                },
+                child: Text('Chess Trainer'),
+              ),
+              SizedBox(height: 20), // Отступ между кнопками
+              ElevatedButton(
+                onPressed: () {
+                  _navigateTo(context, AnotherGameScreen());
+                },
+                child: Text('Another Trainer'),
+              ),
+            ],
+          ),
         ),
       ),
     );
