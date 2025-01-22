@@ -12,6 +12,29 @@
 .swiftpm/
 migrate_working_dir/
 
+# Flutter
+.build/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+.idea/
+*.iml
+*.log
+*.bak
+*.swp
+.DS_Store
+*.class
+*.lock
+*.jar
+*.war
+*.ear
+*.tar.gz
+*.sqlite
+*.db
+*.apk
+*.env
 # IntelliJ related
 *.iml
 *.ipr
