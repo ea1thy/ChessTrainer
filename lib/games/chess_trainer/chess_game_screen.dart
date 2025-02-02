@@ -217,7 +217,7 @@ class _ChessGameScreenState extends State<ChessGameScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Chess Trainer'),
+        title: Text('Pick Square'),
         actions: [
           IconButton(
             icon: Icon(Icons.list),

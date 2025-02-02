@@ -6,9 +6,27 @@ import 'games/another_trainer/another_game_screen.dart';
 class MenuScreen extends StatelessWidget {
   const MenuScreen({Key? key}) : super(key: key);
 
+  /// Переход на экран [screen]
   void _navigateTo(BuildContext context, Widget screen) {
     Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => screen),
+    );
+  }
+
+  /// Показать диалог «Coming Soon»
+  void _showComingSoon(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text('Coming Soon'),
+        content: Text('More mini-games are on the way!'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('OK'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -16,31 +34,64 @@ class MenuScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Choose a Trainer'),
+        title: Text('Choose Coordinates Trainer'),
       ),
-      body: Align(
-        alignment: Alignment.topCenter, // Располагаем весь контент сверху по центру
-        child: FractionallySizedBox(
-          widthFactor: 0.8, // Опционально: Задаём ширину относительно экрана (можно убрать)
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center, // Центрируем кнопки горизонтально
-            children: [
-              SizedBox(height: MediaQuery.of(context).size.height * 0.1), // 10% от высоты экрана
-              ElevatedButton(
-                onPressed: () {
-                  _navigateTo(context, ChessGameScreen());
-                },
-                child: Text('Find cell'),
-              ),
-              SizedBox(height: 20), // Отступ между кнопками
-              ElevatedButton(
-                onPressed: () {
-                  _navigateTo(context, AnotherGameScreen());
-                },
-                child: Text('Enter cell name'),
-              ),
-            ],
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        // Используем GridView, чтобы каждая игра отображалась карточкой
+        child: GridView.count(
+          crossAxisCount: 2,         // Две карточки в строке (при добавлении третьей она займет новую строку)
+          crossAxisSpacing: 16,      // Горизонтальный отступ между карточками
+          mainAxisSpacing: 16,       // Вертикальный отступ
+          childAspectRatio: 1.2,     // Соотношение сторон карточки (регулируйте под нужный дизайн)
+          children: [
+            _GameCard(
+              title: 'Pick Square',
+              onTap: () => _navigateTo(context, ChessGameScreen()),
+            ),
+            _GameCard(
+              title: 'Identify Square',
+              onTap: () => _navigateTo(context, AnotherGameScreen()),
+            ),
+            // Заглушка для будущей мини-игры
+            _GameCard(
+              title: 'Coming Soon ...',
+              onTap: () => _showComingSoon(context),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Вспомогательный виджет-карточка.
+/// Показывает [title] и реагирует на нажатие [onTap].
+class _GameCard extends StatelessWidget {
+  final String title;
+  final VoidCallback onTap;
+
+  const _GameCard({
+    Key? key,
+    required this.title,
+    required this.onTap,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Card(
+        elevation: 4,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              title,
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 16),
+            ),
           ),
         ),
       ),

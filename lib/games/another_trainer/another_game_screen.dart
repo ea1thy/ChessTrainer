@@ -45,7 +45,7 @@ class _AnotherGameScreenState extends State<AnotherGameScreen> {
     List<String> files = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
     List<String> ranks = ['1', '2', '3', '4', '5', '6', '7', '8'];
 
-    positions = [];
+    positions.clear();
     for (var file in files) {
       for (var rank in ranks) {
         positions.add(file + rank);
@@ -75,7 +75,7 @@ class _AnotherGameScreenState extends State<AnotherGameScreen> {
       nextTarget();
     });
 
-    timer = Timer.periodic(Duration(milliseconds: 100), (_) {
+    timer = Timer.periodic(const Duration(milliseconds: 100), (_) {
       setState(() {
         elapsedTime = stopwatch.elapsedMilliseconds / 1000.0;
       });
@@ -97,7 +97,6 @@ class _AnotherGameScreenState extends State<AnotherGameScreen> {
   Future<void> saveResult() async {
     final prefs = await SharedPreferences.getInstance();
     topResults.add(Result(score: score, time: elapsedTime));
-    // Сортировка и ограничение до 10 результатов
     topResults.sort((a, b) {
       if (a.score == b.score) {
         return a.time.compareTo(b.time);
@@ -116,10 +115,10 @@ class _AnotherGameScreenState extends State<AnotherGameScreen> {
 
   Future<void> loadTopResults() async {
     final prefs = await SharedPreferences.getInstance();
-    List<String>? storedResults = prefs.getStringList('anotherTopResults');
+    final storedResults = prefs.getStringList('anotherTopResults');
     if (storedResults != null) {
       topResults = storedResults.map((e) {
-        var parts = e.split(',');
+        final parts = e.split(',');
         return Result(
           score: int.parse(parts[0]),
           time: double.parse(parts[1]),
@@ -153,55 +152,56 @@ class _AnotherGameScreenState extends State<AnotherGameScreen> {
     });
 
     _controller.clear();
-    _focusNode.requestFocus(); // Сохраняем фокус в поле ввода
+    _focusNode.requestFocus();
   }
 
+  /// Виджет шахматного поля.
   Widget buildBoard() {
-    double screenWidth = MediaQuery.of(context).size.width;
-    double cellSize = (screenWidth - 16) / 8;
+    return AspectRatio(
+      aspectRatio: 1.0, // квадрат
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final cellSize = constraints.maxWidth / 8.0;
 
-    List<Widget> rows = [];
-    List<String> files = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
-    List<String> ranks = ['1', '2', '3', '4', '5', '6', '7', '8'];
+          final files = ['A','B','C','D','E','F','G','H'];
+          final ranks = ['1','2','3','4','5','6','7','8'];
 
-    for (var rank in ranks.reversed) {
-      List<Widget> cells = [];
-      for (var file in files) {
-        String position = file + rank;
-
-        cells.add(
-          Container(
-            width: cellSize,
-            height: cellSize,
-            decoration: BoxDecoration(
-              color: position == highlightedPosition
-                  ? Colors.blue
-                  : (files.indexOf(file) + ranks.indexOf(rank)) % 2 == 0
-                  ? Colors.white
-                  : Colors.black,
-              border: Border.all(
-                color: Colors.black38,
-                width: 1,
+          List<Widget> rows = [];
+          for (var rank in ranks.reversed) {
+            List<Widget> cells = [];
+            for (var file in files) {
+              final position = file + rank;
+              cells.add(
+                Container(
+                  width: cellSize,
+                  height: cellSize,
+                  decoration: BoxDecoration(
+                    color: position == highlightedPosition
+                        ? Colors.blue
+                        : (files.indexOf(file) + ranks.indexOf(rank)) % 2 == 0
+                        ? Colors.white
+                        : Colors.black,
+                    border: Border.all(
+                      color: Colors.black38,
+                      width: 1,
+                    ),
+                  ),
+                ),
+              );
+            }
+            rows.add(
+              Row(
+                children: cells,
+                mainAxisSize: MainAxisSize.min,
               ),
-            ),
-          ),
-        );
-      }
-      rows.add(
-        Row(
-          children: cells,
-          mainAxisSize: MainAxisSize.min,
-        ),
-      );
-    }
+            );
+          }
 
-    return Center(
-      child: FittedBox(
-        fit: BoxFit.contain,
-        child: Column(
-          children: rows,
-          mainAxisSize: MainAxisSize.min,
-        ),
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: rows,
+          );
+        },
       ),
     );
   }
@@ -210,7 +210,7 @@ class _AnotherGameScreenState extends State<AnotherGameScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Guess the Chess Square'),
+        title: Text('Identify Square'),
         actions: [
           IconButton(
             icon: Icon(Icons.list),
@@ -218,88 +218,145 @@ class _AnotherGameScreenState extends State<AnotherGameScreen> {
           ),
         ],
       ),
-      body: Padding(
-        padding: EdgeInsets.all(20),
+      body: SafeArea(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            if (!gameStarted)
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Welcome to "Guess the Chess Square"!',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: startGame,
-                    child: Text('Start Game'),
-                  ),
-                ],
+            // Показать доску, только если игра началась и не закончилась
+            if (gameStarted && !gameEnded)
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: buildBoard(),
               ),
-            if (gameStarted && !gameEnded) ...[
-              buildBoard(),
-              SizedBox(height: 20),
-              TextField(
-                controller: _controller,
-                focusNode: _focusNode,
-                decoration: InputDecoration(
-                  labelText: 'Enter square name (e.g., A1)',
-                  border: OutlineInputBorder(),
-                ),
-                style: TextStyle(
-                  fontSize: 50,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.green,
-                ),
-                textAlign: TextAlign.center,
-                onSubmitted: handleSubmit,
+            Expanded(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.all(16),
+                child: buildContent(),
               ),
-              SizedBox(height: 20),
-              Text('Score: $score', style: TextStyle(fontSize: 18)),
-              Text('Attempts Left: $attemptsLeft',
-                  style: TextStyle(fontSize: 18)),
-              Text(
-                'Time: ${elapsedTime.toStringAsFixed(1)} seconds',
-                style: TextStyle(fontSize: 18),
-              ),
-            ],
-            if (gameEnded) ...[
-              Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Game Over',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: 10),
-                    Text('Score: $score', style: TextStyle(fontSize: 18)),
-                    SizedBox(height: 10),
-                    Text(
-                      'Time: ${elapsedTime.toStringAsFixed(1)} seconds',
-                      style: TextStyle(fontSize: 18),
-                    ),
-                    SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: startGame,
-                      child: Text('Restart Game'),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+            ),
           ],
         ),
       ),
+    );
+  }
+
+  /// Собираем контент (поле ввода, стартовый экран, game over и т.п.)
+  Widget buildContent() {
+    // Если игра НЕ запущена:
+    if (!gameStarted) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            RichText(
+              textAlign: TextAlign.center,
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: "Welcome to the Chess Position Trainer!\n",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      color: Colors.black,
+                    ),
+                  ),
+                  TextSpan(
+                    text:
+                    "Improve your memory by identifying squares.\n",
+                    style: TextStyle(
+                      fontStyle: FontStyle.italic,
+                      fontSize: 16,
+                      color: Colors.blue,
+                    ),
+                  ),
+                  TextSpan(
+                    text: "\nHow to play:\n",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      color: Colors.green,
+                    ),
+                  ),
+                  TextSpan(
+                    text:
+                    "1. Look at the highlighted square name.\n"
+                        "2. Tap the corresponding square on the chessboard.\n"
+                        "3. You have 10 attempts. Good luck!\n",
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 20),
+            Image.asset('assets/chess_icon.png', height: 100),
+            SizedBox(height: 40),
+            ElevatedButton(
+              onPressed: startGame,
+              child: Text('Start Game'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Если игра окончена:
+    if (gameEnded) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Game Over',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 10),
+            Text('Score: $score', style: TextStyle(fontSize: 18)),
+            SizedBox(height: 10),
+            Text(
+              'Time: ${elapsedTime.toStringAsFixed(1)} seconds',
+              style: TextStyle(fontSize: 18),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: startGame,
+              child: Text('Restart Game'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Игра идёт (но не окончена):
+    return Column(
+      children: [
+        TextField(
+          controller: _controller,
+          focusNode: _focusNode,
+          decoration: InputDecoration(
+            labelText: 'Enter square name (e.g., A1)',
+            border: OutlineInputBorder(),
+          ),
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.green,
+          ),
+          textAlign: TextAlign.center,
+          onSubmitted: handleSubmit,
+        ),
+        SizedBox(height: 20),
+        Text('Score: $score', style: TextStyle(fontSize: 18)),
+        Text('Attempts Left: $attemptsLeft', style: TextStyle(fontSize: 18)),
+        Text(
+          'Time: ${elapsedTime.toStringAsFixed(1)} seconds',
+          style: TextStyle(fontSize: 18),
+        ),
+      ],
     );
   }
 }
